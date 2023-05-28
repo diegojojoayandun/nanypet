@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  nanypet:
+    container_name: NanyPet
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "32770:443"
+      - "9000:80"
+    depends_on:
+      - db
+    environment:
+      ConnectionStrings__MySqlConnection: "server=host.docker.internal;port=3306;database=nanypet;uid=root;password=root"
+  db:
+    container_name: mysql-database-2
+    image: mysql-database
+   
+    ports:
+      - "3306:3306"
+    
+
