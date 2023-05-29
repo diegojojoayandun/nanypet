@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Models;
 using NanyPet.Models.Dto.Herder;
@@ -8,6 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace NanyPet.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HerderController : ControllerBase
@@ -30,11 +31,12 @@ namespace NanyPet.Controllers
         /// <response code="200">Herder's list retrieved</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(
             Summary = "Obtiene un listado de todos los cuidadores registrados",
             Description = "Obtiene un listado de todos los cuidadores registrados",
             OperationId = "GetAllHerders",
-            Tags =  new[] { "Cuidadores" })]
+            Tags = new[] { "Cuidadores" })]
         public async Task<ActionResult<IEnumerable<HerderDto>>> GetAllHerders()
         {
             _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
@@ -53,6 +55,7 @@ namespace NanyPet.Controllers
         [HttpGet("{id}", Name = "GetHerder")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(
             Summary = "Obtiene cuidador por Id",
@@ -66,7 +69,7 @@ namespace NanyPet.Controllers
 
             var herder = await _herderRepository.GetHerderById(v => v.Id == id);
 
-            if (herder == null) 
+            if (herder == null)
             {
                 _logger.LogError("No hay datos asociados a ese Id");
                 return NotFound();
@@ -134,7 +137,7 @@ namespace NanyPet.Controllers
             Tags = new[] { "Cuidadores" })]
         public async Task<IActionResult> UpdateHerder(int id, [FromBody] HerderUpdateDto updateDto)
         {
-            if (updateDto == null || id!= updateDto.Id)
+            if (updateDto == null || id != updateDto.Id)
             {
                 return BadRequest();
             }
