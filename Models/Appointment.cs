@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NanyPet.Models
+namespace NanyPet.Api.Models
 {
     public partial class Appointment
     {

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NanyPet.Api.Models;
 using NanyPet.Models;
 using NanyPet.Models.Dto.Herder;
 using NanyPet.Repositories;
@@ -98,7 +99,7 @@ namespace NanyPet.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _herderRepository.GetHerderById(v => v.Email == createHerderDto.Email) != null)
+            if (await _herderRepository.GetHerderById(v => v.EmailUser == createHerderDto.Email) != null)
             {
                 ModelState.AddModelError("Cuidador ya existe", "Ya hay registrado un cuidador con ese Id!");
                 return BadRequest(ModelState);

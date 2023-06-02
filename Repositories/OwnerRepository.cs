@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
+using NanyPet.Api.Models;
 using NanyPet.Models;
 using System.Collections.Generic;
 using System.Diagnostics;

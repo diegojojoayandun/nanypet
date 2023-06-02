@@ -1,4 +1,5 @@
-﻿using NanyPet.Models;
+﻿using NanyPet.Api.Models;
+using NanyPet.Models;
 using System.Linq.Expressions;
 
 namespace NanyPet.Repositories

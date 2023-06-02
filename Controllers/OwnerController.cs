@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using NanyPet.Api.Models;
 using NanyPet.Models;
 using NanyPet.Models.Dto.Owner;
 using NanyPet.Repositories;
@@ -94,7 +95,7 @@ namespace NanyPet.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _ownerRepository.GetOwnerById(v => v.Email == createOwnerDto.Email) != null)
+            if (await _ownerRepository.GetOwnerById(v => v.EmailUser == createOwnerDto.EmailUser) != null)
             {
                 ModelState.AddModelError("Propietario ya existe", "Ya hay registrado un propietario con ese Id!");
                 return BadRequest(ModelState);
