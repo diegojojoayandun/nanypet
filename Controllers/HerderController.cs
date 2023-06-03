@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace NanyPet.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HerderController : ControllerBase
@@ -30,6 +30,8 @@ namespace NanyPet.Controllers
         /// </summary>
         /// <remarks>Awesomeness!</remarks>
         /// <response code="200">Herder's list retrieved</response>
+        /// 
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

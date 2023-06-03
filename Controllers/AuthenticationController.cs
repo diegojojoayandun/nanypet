@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
 using NanyPet.Repositories;
 using System.IdentityModel.Tokens.Jwt;
@@ -31,7 +32,7 @@ namespace NanyPet.Api.Controllers
             }
 
             // If authentication succeeds, generate and return a JWT token
-            var token = GenerateJwtToken(user);
+            var token = GenerateJwtToken(user.Email);
 
             return Ok(new { token });
         }
@@ -43,18 +44,15 @@ namespace NanyPet.Api.Controllers
             if (email == null || password == null)
                 return false;
 
-            var UserEmail = await  _userRepository.GetUserByEmail(v => v.Email == email);
-            //var UserPassword = _userRepository.GetUserById(v => v.Password == password);
+            var UserData = await  _userRepository.GetUserByEmail(v => v.Email == email);
             
-            if (UserEmail != null)
-            {
+            if (UserData != null && UserData.Email == email && UserData.Password == password)
                 return true;
-            }
 
             return false;
         }
 
-        private string GenerateJwtToken(UserDto user)
+        private string GenerateJwtToken(string user)
         {
             // Header
 
@@ -66,7 +64,7 @@ namespace NanyPet.Api.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Name, user),
             };
 
             // Payload
@@ -77,7 +75,7 @@ namespace NanyPet.Api.Controllers
                 _configuration["Authentication:Audience"],
                 claims,
                 DateTime.Now,
-                DateTime.UtcNow.AddMinutes(2)
+                DateTime.UtcNow.AddMinutes(15)
             );
 
             var token = new JwtSecurityToken(header, payload);

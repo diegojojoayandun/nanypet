@@ -59,7 +59,7 @@ namespace NanyPet.Api.Controllers
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
-        [HttpGet("{id}", Name = "GetUser")]
+        [HttpGet("id/{id}", Name = "GetUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -94,7 +94,7 @@ namespace NanyPet.Api.Controllers
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
-        [HttpGet("{email}", Name = "GetUserEmail")]
+        [HttpGet("email/{email}", Name = "GetUserEmail")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
