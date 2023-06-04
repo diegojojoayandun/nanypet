@@ -1,6 +1,8 @@
+using DotEnv.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MySqlConnector;
 using NanyPet;
 using NanyPet.Api.Models;
 //using NanyPet.Api.Models;
@@ -11,9 +13,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 // Add services to the container.
 
 var Configuration = builder.Configuration; // Forma de usar IConfiguration Interfaz en net core 6.0 o superior
+
+new EnvLoader().Load();
+Configuration.AddEnvironmentVariables();
+//builder.Configuration.AddEnvironmentVariables();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -22,7 +31,7 @@ builder.Services.AddSwaggerGen(options => { options.EnableAnnotations(); });
 
 builder.Services.AddDbContext<nanypetContext>(option =>
 {
-    option.UseMySql(builder.Configuration.GetConnectionString("MySqlConnection"), ServerVersion.Parse("8.0.30-mysql"));
+    option.UseMySql(Configuration["CONNECTION_STRING"], ServerVersion.Parse("8.0.30-mysql"));
 
 });
 
@@ -49,7 +58,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         //ValidIssuer = Configuration["Authentication:Issuer"],
         //ValidAudience = Configuration["Authentication: Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Authentication:SecretKey"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SECRET_KEY"]))
     };
 });
 

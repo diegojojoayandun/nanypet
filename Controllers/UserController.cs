@@ -33,10 +33,9 @@ namespace NanyPet.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieves a list with all Herders
+        /// Retrieves a list with all users
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <response code="200">Herder's list retrieved</response>
+        /// <response code="200">User's list retrieved Successful</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [SwaggerOperation(
@@ -52,13 +51,12 @@ namespace NanyPet.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieves a specific Herder by unique id
+        /// Retrieves a specific User by Id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="1">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
-        /// <response code="404">Product not found</response>
+        /// <response code="404">user not found</response>
         [HttpGet("id/{id}", Name = "GetUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,15 +83,13 @@ namespace NanyPet.Api.Controllers
 
         }
 
-
         /// <summary>
-        /// Retrieves a specific Herder by unique EMAIL
+        /// Retrieves a specific user by email address
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
-        /// <response code="200">herder retrieved</response>
+        /// <param email="mail@sample.com">user's email</param>
+        /// <response code="200">User retrieved</response>
         /// <response code="400">bad request</response>
-        /// <response code="404">Product not found</response>
+        /// <response code="404">user not found</response>
         [HttpGet("email/{email}", Name = "GetUserEmail")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -108,7 +104,7 @@ namespace NanyPet.Api.Controllers
             if (email == null)
                 return BadRequest();
 
-            var user = await _userRepository.GetUserById(v => v.Email == email);
+            var user = await _userRepository.GetUserByEmail(v => v.Email == email);
 
             if (user == null)
             {
@@ -117,12 +113,15 @@ namespace NanyPet.Api.Controllers
             }
 
             return Ok(_mapper.Map<UserDto>(user));
-
         }
 
         /// <summary>
-        /// Create a Herder in the database
+        /// Create an User in the DB
         /// </summary>
+        /// <param email="mail@sample.com">user's email</param>
+        /// <response code="201">User Created</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="500">Cannot create user</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -132,23 +131,19 @@ namespace NanyPet.Api.Controllers
             Description = "Crea un nuevo usuario en la Base de datos",
             OperationId = "CreateUser",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<UserDto>> CreateOwner([FromBody] UserCreateDto createUserDto)
+        public async Task<ActionResult<UserDto>> UserCreateDto([FromBody] UserCreateDto createUserDto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             if (await _userRepository.GetUserById(v => v.Email == createUserDto.Email) != null)
             {
-                ModelState.AddModelError("Usuario ya existe", "Ya hay registrado un usuario con ese Id!");
+                ModelState.AddModelError("Usuario ya existe", "Ya existe un usuario registrado con ese Email!");
                 return BadRequest(ModelState);
             }
 
             if (createUserDto == null)
-            {
                 return BadRequest(createUserDto);
-            }
 
             User modelUser = _mapper.Map<User>(createUserDto);
 
