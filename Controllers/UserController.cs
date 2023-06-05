@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
+using NanyPet.Api.Utils;
 using NanyPet.Controllers;
 using NanyPet.Models.Dto.Owner;
 using NanyPet.Repositories;
@@ -144,6 +145,8 @@ namespace NanyPet.Api.Controllers
 
             if (createUserDto == null)
                 return BadRequest(createUserDto);
+
+            createUserDto.Password = PasswordHasher.HashPassword(createUserDto.Password);
 
             User modelUser = _mapper.Map<User>(createUserDto);
 

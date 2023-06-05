@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace NanyPet.Api.Models
 {
@@ -9,8 +11,12 @@ namespace NanyPet.Api.Models
         {
             Appointments = new HashSet<Appointment>();
         }
-
+        [Key] // primary key
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
         public int Id { get; set; }
+        [Required]
+        [EmailAddress]
+        [StringLength(60)]
         public string EmailUser { get; set; } = null!;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

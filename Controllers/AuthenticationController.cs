@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
+using NanyPet.Api.Utils;
 using NanyPet.Repositories;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -46,7 +47,7 @@ namespace NanyPet.Api.Controllers
 
             var UserData = await  _userRepository.GetUserByEmail(v => v.Email == email);
             
-            if (UserData != null && UserData.Email == email && UserData.Password == password)
+            if (UserData != null && UserData.Email == email && PasswordHasher.VerifyPassword(password, UserData.Password))
                 return true;
 
             return false;
