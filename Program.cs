@@ -1,14 +1,11 @@
 using DotEnv.Core;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MySqlConnector;
 using NanyPet;
 using NanyPet.Api.Models;
-//using NanyPet.Api.Models;
-using NanyPet.Models;
 using NanyPet.Repositories;
-//using NanyPet.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,10 +38,12 @@ builder.Services.AddScoped<IHerderRepository, HerderRepository>();
 builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
 }).AddJwtBearer(options =>
 {
@@ -56,28 +55,51 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        //ValidIssuer = Configuration["Authentication:Issuer"],
-        //ValidAudience = Configuration["Authentication: Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SECRET_KEY"]))
     };
 });
 
+
+builder.Services.AddAuthentication(options => { 
+
+options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+    .AddCookie(options =>
+{
+    options.LoginPath = "/api/signin-google";
+    //options.LoginPath = "/account/facebook-login";
+})
+.AddGoogle(options =>
+{
+    options.ClientId = Configuration["CLIENT_ID"];
+    options.ClientSecret = Configuration["CLIENT_SECRET"];
+});
+
+builder.Services.AddHttpContextAccessor();
+
+
 var app = builder.Build();
 
-app.UseAuthentication();
 
-app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //app.UseAuthentication();
-    //app.UseAuthorization();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
+//app.UseCors();
+app.UseRouting();
+
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

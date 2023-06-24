@@ -132,7 +132,7 @@ namespace NanyPet.Api.Controllers
             Description = "Crea un nuevo usuario en la Base de datos",
             OperationId = "CreateUser",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<UserDto>> UserCreateDto([FromBody] UserCreateDto createUserDto)
+        public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto createUserDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

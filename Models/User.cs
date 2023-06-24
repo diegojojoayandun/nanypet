@@ -14,10 +14,10 @@ namespace NanyPet.Api.Models
         [Key] // primary key
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage ="Email Address is requiered")]
         [EmailAddress]
         public string Email { get; set; } = null!;
-        [Required]
+        [Required(ErrorMessage = "Password is requiered")]
         public string Password { get; set; } = null!;
         public int RoleId { get; set; }
 

@@ -10,14 +10,16 @@ using System.Text;
 
 namespace NanyPet.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
 
-        public AuthenticationController(IConfiguration configuration, IUserRepository userRepository)
+        public AuthenticationController(
+            IConfiguration configuration, 
+            IUserRepository userRepository)
         {
             _configuration = configuration;
             _userRepository = userRepository;
