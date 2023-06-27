@@ -4,6 +4,7 @@ using NanyPet.Api.Models;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Herder;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace NanyPet.Controllers
 {
@@ -15,6 +16,7 @@ namespace NanyPet.Controllers
         private readonly ILogger<HerderController> _logger;
         private readonly IHerderRepository _herderRepository;
         private readonly IMapper _mapper;
+        protected APIResponse _apiResponse;
 
         public HerderController(
             IHerderRepository herderRepository,
@@ -24,6 +26,7 @@ namespace NanyPet.Controllers
             _logger = logger;
             _herderRepository = herderRepository;
             _mapper = mapper;
+            _apiResponse = new APIResponse();
         }
 
         /// <summary>
@@ -41,11 +44,26 @@ namespace NanyPet.Controllers
             Description = "Obtiene un listado de todos los cuidadores registrados",
             OperationId = "GetAllHerders",
             Tags = new[] { "Cuidadores" })]
-        public async Task<ActionResult<IEnumerable<HerderDto>>> GetAllHerders()
+        public async Task<ActionResult<APIResponse>> GetAllHerders()
         {
-            _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
-            IEnumerable<Herder> herderList = await _herderRepository.GetAll();
-            return Ok(_mapper.Map<IEnumerable<HerderDto>>(herderList));
+            try
+            {
+                _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
+                IEnumerable<Herder> herderList = await _herderRepository.GetAll();
+                _apiResponse.Result = _mapper.Map<IEnumerable<HerderDto>>(herderList);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+
+            }
+            catch (Exception ex)
+            {
+
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+
+            return _apiResponse;
+            
         }
 
         /// <summary>
@@ -66,21 +84,41 @@ namespace NanyPet.Controllers
             Description = "Obtiene cuidador por Id",
             OperationId = "GetHerderById",
             Tags = new[] { "Cuidadores" })]
-        public async Task<ActionResult<HerderDto>> GetHerdersById(int id)
+        public async Task<ActionResult<APIResponse>> GetHerdersById(int id)
         {
-            if (id == 0)
-                return BadRequest();
-
-            var herder = await _herderRepository.GetById(v => v.Id == id);
-
-            if (herder == null)
+            try
             {
-                _logger.LogError("No hay datos asociados a ese Id");
-                return NotFound();
+                if (id == 0)
+                {
+                    _logger.LogError("Error al buscar con Id " + id);
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+                
+
+                var herder = await _herderRepository.GetById(v => v.Id == id);
+
+                if (herder == null)
+                {
+                    _logger.LogError("No hay datos asociados a ese Id " + id);
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                _apiResponse.Result = _mapper.Map<HerderDto>(herder);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+
             }
+            catch (Exception ex)
+            {
 
-            return Ok(_mapper.Map<HerderDto>(herder));
-
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
         }
 
 
@@ -95,20 +133,39 @@ namespace NanyPet.Controllers
             OperationId = "GetHerderByEmail",
             Tags = new[] { "Cuidadores" })]
 
-        public async Task<ActionResult<HerderDto>> GetUserByEmail(string email)
+        public async Task<ActionResult<APIResponse>> GetUserByEmail(string email)
         {
-            if (email == null)
-                return BadRequest();
-
-            var herder = await _herderRepository.GetByEmail(v => v.EmailUser == email);
-
-            if (herder == null)
+            try
             {
-                _logger.LogError("No hay datos asociados a ese Correo");
-                return NotFound();
+                if (email == null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+
+
+                var herder = await _herderRepository.GetByEmail(v => v.EmailUser == email);
+
+                if (herder == null)
+                {
+                    _logger.LogError("No hay datos asociados al Correo " + email);
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                _apiResponse.Result = _mapper.Map<HerderDto>(herder);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
             }
 
-            return Ok(_mapper.Map<HerderDto>(herder));
+            return _apiResponse;
         }
 
         /// <summary>
@@ -123,31 +180,42 @@ namespace NanyPet.Controllers
             Description = "Crea un nuevo cuidador en la Base de datos",
             OperationId = "CreateHerder",
             Tags = new[] { "Cuidadores" })]
-        public async Task<ActionResult<HerderDto>> CreateHerder([FromBody] HerderCreateDto createHerderDto)
+        public async Task<ActionResult<APIResponse>> CreateHerder([FromBody] HerderCreateDto createHerderDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (await _herderRepository.GetByEmail(v => v.EmailUser == createHerderDto.EmailUser) != null)
+                {
+                    ModelState.AddModelError("Error Usuario", "No hay usuario asociado a ese email!");
+                    return BadRequest(ModelState);
+                }
+
+                if (createHerderDto == null)
+                {
+                    return BadRequest(createHerderDto);
+                }
+
+                Herder modelHerder = _mapper.Map<Herder>(createHerderDto);
+
+                await _herderRepository.Create(modelHerder);
+                _apiResponse.Result = modelHerder;
+                _apiResponse.StatusCode = HttpStatusCode.Created;
+
+                return CreatedAtRoute("GetHerder", new { id = modelHerder.Id }, _apiResponse);
+
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
             }
 
-            if (await _herderRepository.GetByEmail(v => v.EmailUser == createHerderDto.EmailUser) != null)
-            {
-                ModelState.AddModelError("Error Usuario", "No hay usuario asociado a ese email!");
-                return BadRequest(ModelState);
-            }
-
-            if (createHerderDto == null)
-            {
-                return BadRequest(createHerderDto);
-            }
-
-            Herder modelHerder = _mapper.Map<Herder>(createHerderDto);
-
-            await _herderRepository.Create(modelHerder);
-
-
-            return CreatedAtRoute("GetHerder", new { id = modelHerder.Id }, modelHerder);
-
+            return _apiResponse;
         }
 
         /// <summary>
@@ -169,16 +237,28 @@ namespace NanyPet.Controllers
             Tags = new[] { "Cuidadores" })]
         public async Task<IActionResult> UpdateHerder(int id, [FromBody] HerderUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.Id)
+            try
             {
-                return BadRequest();
+                if (updateDto == null || id != updateDto.Id)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+
+                Herder modelHerder = _mapper.Map<Herder>(updateDto);
+
+                await _herderRepository.Update(modelHerder);
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+
+                return Ok(_apiResponse);
             }
-
-            Herder modelHerder = _mapper.Map<Herder>(updateDto);
-
-            await _herderRepository.Update(modelHerder);
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return BadRequest(_apiResponse);
         }
 
         /// <summary>
@@ -200,16 +280,35 @@ namespace NanyPet.Controllers
             Tags = new[] { "Cuidadores" })]
         public async Task<IActionResult> DeleteHerder(int id)
         {
-            if (id == 0)
-                return BadRequest();
+            try
+            {
+                if (id == 0)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+                
+                var herder = await _herderRepository.GetById(v => v.Id == id);
 
-            var herder = await _herderRepository.GetById(v => v.Id == id);
+                if (herder == null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
 
-            if (herder == null)
-                return NotFound();
+                await _herderRepository.Delete(herder);
 
-            await _herderRepository.Delete(herder);
-            return NoContent();
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return BadRequest(_apiResponse);
         }
     }
 }
