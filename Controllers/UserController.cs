@@ -1,18 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
 using NanyPet.Api.Utils;
-using NanyPet.Controllers;
-using NanyPet.Models.Dto.Owner;
 using NanyPet.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace NanyPet.Api.Controllers
 {
@@ -47,7 +39,7 @@ namespace NanyPet.Api.Controllers
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
             _logger.LogInformation("Obteniendo lista de usuarios"); // log -> show information on VS terminal
-            IEnumerable<User> userList = await _userRepository.GetAllUsers();
+            IEnumerable<User> userList = await _userRepository.GetAll();
             return Ok(_mapper.Map<IEnumerable<UserDto>>(userList));
         }
 
@@ -72,7 +64,7 @@ namespace NanyPet.Api.Controllers
             if (id == 0)
                 return BadRequest();
 
-            var user = await _userRepository.GetUserById(v => v.Id == id);
+            var user = await _userRepository.GetById(v => v.Id == id);
 
             if (user == null)
             {
@@ -137,7 +129,7 @@ namespace NanyPet.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _userRepository.GetUserById(v => v.Email == createUserDto.Email) != null)
+            if (await _userRepository.GetUserByEmail(v => v.Email == createUserDto.Email) != null)
             {
                 ModelState.AddModelError("Usuario ya existe", "Ya existe un usuario registrado con ese Email!");
                 return BadRequest(ModelState);
@@ -150,7 +142,7 @@ namespace NanyPet.Api.Controllers
 
             User modelUser = _mapper.Map<User>(createUserDto);
 
-            await _userRepository.CreateUser(modelUser);
+            await _userRepository.Create(modelUser);
 
 
             return CreatedAtRoute("GetUser", new { id = modelUser.Id }, modelUser);
@@ -220,6 +212,6 @@ namespace NanyPet.Api.Controllers
 
         //}
 
-        
+
     }
 }

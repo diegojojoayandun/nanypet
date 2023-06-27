@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
-using NanyPet.Models;
 using NanyPet.Models.Dto.Owner;
 using NanyPet.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
@@ -16,7 +15,10 @@ namespace NanyPet.Controllers
         private readonly IOwnerRepository _ownerRepository;
         private readonly IMapper _mapper;
 
-        public OwnerController(IOwnerRepository ownerRepository, ILogger<OwnerController> logger, IMapper mapper)
+        public OwnerController(
+            IOwnerRepository ownerRepository,
+            ILogger<OwnerController> logger,
+            IMapper mapper)
         {
             _logger = logger;
             _ownerRepository = ownerRepository;
@@ -34,11 +36,11 @@ namespace NanyPet.Controllers
             Summary = "Obtiene un listado de todos los propietarios registrados",
             Description = "Obtiene un listado de todos los propietarios registrados",
             OperationId = "GetAllOwners",
-            Tags =  new[] { "Propietarios" })]
+            Tags = new[] { "Propietarios" })]
         public async Task<ActionResult<IEnumerable<OwnerDto>>> GetAllOwners()
         {
             _logger.LogInformation("Obteniendo lista de propietarios"); // log -> show information on VS terminal
-            IEnumerable<Owner> ownerList = await _ownerRepository.GetAllOwners();
+            IEnumerable<Owner> ownerList = await _ownerRepository.GetAll();
             return Ok(_mapper.Map<IEnumerable<OwnerDto>>(ownerList));
         }
 
@@ -64,9 +66,9 @@ namespace NanyPet.Controllers
             if (id == 0)
                 return BadRequest();
 
-            var owner = await _ownerRepository.GetOwnerById(v => v.Id == id);
+            var owner = await _ownerRepository.GetById(v => v.Id == id);
 
-            if (owner == null) 
+            if (owner == null)
             {
                 _logger.LogError("No hay datos asociados a ese Id");
                 return NotFound();
@@ -95,7 +97,7 @@ namespace NanyPet.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _ownerRepository.GetOwnerById(v => v.EmailUser == createOwnerDto.EmailUser) != null)
+            if (await _ownerRepository.GetByEmail(v => v.EmailUser == createOwnerDto.EmailUser) != null)
             {
                 ModelState.AddModelError("Propietario ya existe", "Ya hay registrado un propietario con ese Id!");
                 return BadRequest(ModelState);
@@ -108,10 +110,10 @@ namespace NanyPet.Controllers
 
             Owner modelOwner = _mapper.Map<Owner>(createOwnerDto);
 
-            await _ownerRepository.CreateOwner(modelOwner);
+            await _ownerRepository.Create(modelOwner);
 
 
-            return CreatedAtRoute("GetHerder", new { id = modelOwner.Id }, modelOwner);
+            return CreatedAtRoute("GetOwner", new { id = modelOwner.Id }, modelOwner);
 
         }
 
@@ -134,14 +136,14 @@ namespace NanyPet.Controllers
             Tags = new[] { "Propietarios" })]
         public async Task<IActionResult> UpdateOwner(int id, [FromBody] OwnerUpdateDto updateDto)
         {
-            if (updateDto == null || id!= updateDto.Id)
+            if (updateDto == null || id != updateDto.Id)
             {
                 return BadRequest();
             }
 
             Owner modelOwner = _mapper.Map<Owner>(updateDto);
 
-            await _ownerRepository.UpdateOwner(modelOwner);
+            await _ownerRepository.Update(modelOwner);
 
             return NoContent();
         }
@@ -168,12 +170,12 @@ namespace NanyPet.Controllers
             if (id == 0)
                 return BadRequest();
 
-            var owner = await _ownerRepository.GetOwnerById(v => v.Id == id);
+            var owner = await _ownerRepository.GetById(v => v.Id == id);
 
             if (owner == null)
                 return NotFound();
 
-            await _ownerRepository.DeleteOwner(owner);
+            await _ownerRepository.Delete(owner);
             return NoContent();
         }
     }

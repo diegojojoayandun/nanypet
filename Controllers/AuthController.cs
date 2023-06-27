@@ -1,18 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
-using System.Net.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using NanyPet.Repositories;
 using NanyPet.Api.Models.Dto.User;
-using Microsoft.AspNetCore.Identity;
 using NanyPet.Api.Utils;
+using NanyPet.Repositories;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace GoogleAuth.Controllers
 {
@@ -25,8 +22,8 @@ namespace GoogleAuth.Controllers
         private readonly IUserRepository _userRepository;
 
         public AuthController(
-            ILogger<AuthController> logger, 
-            IConfiguration configuration, 
+            ILogger<AuthController> logger,
+            IConfiguration configuration,
             IUserRepository userRepository)
         {
             _logger = logger;

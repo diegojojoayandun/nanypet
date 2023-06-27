@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
-using NanyPet.Models;
 using NanyPet.Models.Dto.Herder;
 using NanyPet.Models.Dto.Owner;
 
@@ -22,7 +21,7 @@ namespace NanyPet
 
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<User, UserCreateDto>().ReverseMap();
-           // CreateMap<Owner, OwnerUpdateDto>().ReverseMap();
+            // CreateMap<Owner, OwnerUpdateDto>().ReverseMap();
         }
     }
 }

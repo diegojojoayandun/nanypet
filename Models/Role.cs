@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NanyPet.Api.Models
+﻿namespace NanyPet.Api.Models
 {
     public partial class Role
     {

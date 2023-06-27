@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
-using NanyPet.Models;
 using NanyPet.Models.Dto.Herder;
 using NanyPet.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
@@ -18,7 +16,10 @@ namespace NanyPet.Controllers
         private readonly IHerderRepository _herderRepository;
         private readonly IMapper _mapper;
 
-        public HerderController(IHerderRepository herderRepository, ILogger<HerderController> logger, IMapper mapper)
+        public HerderController(
+            IHerderRepository herderRepository,
+            ILogger<HerderController> logger,
+            IMapper mapper)
         {
             _logger = logger;
             _herderRepository = herderRepository;
@@ -26,12 +27,12 @@ namespace NanyPet.Controllers
         }
 
         /// <summary>
-        /// Retrieves a list with all Herders
+        /// Retorna una lista de todos los cuidadores registrados
         /// </summary>
         /// <remarks>Awesomeness!</remarks>
         /// <response code="200">Herder's list retrieved</response>
         /// 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -43,7 +44,7 @@ namespace NanyPet.Controllers
         public async Task<ActionResult<IEnumerable<HerderDto>>> GetAllHerders()
         {
             _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
-            IEnumerable<Herder> herderList = await _herderRepository.GetAllHerders();
+            IEnumerable<Herder> herderList = await _herderRepository.GetAll();
             return Ok(_mapper.Map<IEnumerable<HerderDto>>(herderList));
         }
 
@@ -65,12 +66,12 @@ namespace NanyPet.Controllers
             Description = "Obtiene cuidador por Id",
             OperationId = "GetHerderById",
             Tags = new[] { "Cuidadores" })]
-        public async Task<ActionResult<HerderDto>> GetHerderById(int id)
+        public async Task<ActionResult<HerderDto>> GetHerdersById(int id)
         {
             if (id == 0)
                 return BadRequest();
 
-            var herder = await _herderRepository.GetHerderById(v => v.Id == id);
+            var herder = await _herderRepository.GetById(v => v.Id == id);
 
             if (herder == null)
             {
@@ -80,6 +81,34 @@ namespace NanyPet.Controllers
 
             return Ok(_mapper.Map<HerderDto>(herder));
 
+        }
+
+
+        [HttpGet("email/{email}", Name = "GetByMail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(
+            Summary = "Obtiene cuidador por mail",
+            Description = "Obtiene cuidador por mail",
+            OperationId = "GetHerderByEmail",
+            Tags = new[] { "Cuidadores" })]
+
+        public async Task<ActionResult<HerderDto>> GetUserByEmail(string email)
+        {
+            if (email == null)
+                return BadRequest();
+
+            var herder = await _herderRepository.GetByEmail(v => v.EmailUser == email);
+
+            if (herder == null)
+            {
+                _logger.LogError("No hay datos asociados a ese Correo");
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<HerderDto>(herder));
         }
 
         /// <summary>
@@ -101,9 +130,9 @@ namespace NanyPet.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _herderRepository.GetHerderById(v => v.EmailUser == createHerderDto.Email) != null)
+            if (await _herderRepository.GetByEmail(v => v.EmailUser == createHerderDto.EmailUser) != null)
             {
-                ModelState.AddModelError("Cuidador ya existe", "Ya hay registrado un cuidador con ese Id!");
+                ModelState.AddModelError("Error Usuario", "No hay usuario asociado a ese email!");
                 return BadRequest(ModelState);
             }
 
@@ -114,7 +143,7 @@ namespace NanyPet.Controllers
 
             Herder modelHerder = _mapper.Map<Herder>(createHerderDto);
 
-            await _herderRepository.CreateHerder(modelHerder);
+            await _herderRepository.Create(modelHerder);
 
 
             return CreatedAtRoute("GetHerder", new { id = modelHerder.Id }, modelHerder);
@@ -147,7 +176,7 @@ namespace NanyPet.Controllers
 
             Herder modelHerder = _mapper.Map<Herder>(updateDto);
 
-            await _herderRepository.UpdateHerder(modelHerder);
+            await _herderRepository.Update(modelHerder);
 
             return NoContent();
         }
@@ -174,12 +203,12 @@ namespace NanyPet.Controllers
             if (id == 0)
                 return BadRequest();
 
-            var herder = await _herderRepository.GetHerderById(v => v.Id == id);
+            var herder = await _herderRepository.GetById(v => v.Id == id);
 
             if (herder == null)
                 return NotFound();
 
-            await _herderRepository.DeleteHerder(herder);
+            await _herderRepository.Delete(herder);
             return NoContent();
         }
     }

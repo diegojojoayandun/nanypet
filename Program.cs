@@ -60,9 +60,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-builder.Services.AddAuthentication(options => { 
+builder.Services.AddAuthentication(options =>
+{
 
-options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
     .AddCookie(options =>
 {

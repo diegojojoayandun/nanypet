@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
 namespace NanyPet.Api.Models
 {
@@ -18,13 +16,13 @@ namespace NanyPet.Api.Models
         [EmailAddress]
         [MaxLength(60)]
         public string EmailUser { get; set; } = null!;
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
-        public string Phone { get; set; } = null!;
-        public string Address { get; set; } = null!;
-        public string City { get; set; } = null!;
-        public string State { get; set; } = null!;
-        public string Location { get; set; } = null!;
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Location { get; set; }
 
         public virtual User EmailUserNavigation { get; set; } = null!;
         public virtual ICollection<Pet> Pets { get; set; }

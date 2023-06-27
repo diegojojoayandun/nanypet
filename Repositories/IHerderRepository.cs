@@ -1,17 +1,11 @@
 ﻿using NanyPet.Api.Models;
-using NanyPet.Models;
+using NanyPet.Api.Repositories.IRepository;
 using System.Linq.Expressions;
 
 namespace NanyPet.Repositories
 {
-    public interface IHerderRepository
+    public interface IHerderRepository : IRepository<Herder>
     {
-        Task<List<Herder>> GetAllHerders(Expression<Func<Herder, bool>>? filter = null);
-        Task<Herder?> GetHerderById(Expression<Func<Herder, bool>>? filter = null, bool tracked = true);
-        Task InsertHerder(Herder herder);
-        Task UpdateHerder(Herder herder);
-        Task DeleteHerder(Herder herder);
-        Task CreateHerder(Herder herder);
-
+        Task<Herder?> GetByEmail(Expression<Func<Herder, bool>>? filter = null, bool tracked = true);
     }
 }

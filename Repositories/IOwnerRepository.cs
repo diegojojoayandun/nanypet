@@ -1,16 +1,11 @@
 ﻿using NanyPet.Api.Models;
-using NanyPet.Models;
+using NanyPet.Api.Repositories.IRepository;
 using System.Linq.Expressions;
 
 namespace NanyPet.Repositories
 {
-    public interface IOwnerRepository
+    public interface IOwnerRepository : IRepository<Owner>
     {
-        Task<List<Owner>> GetAllOwners(Expression<Func<Owner, bool>>? filter = null);
-        Task<Owner?> GetOwnerById(Expression<Func<Owner, bool>>? filter = null, bool tracked = true);
-        Task UpdateOwner(Owner owner);
-        Task DeleteOwner(Owner owner);
-        Task CreateOwner(Owner owner);
-
+        Task<Owner?> GetByEmail(Expression<Func<Owner, bool>>? filter = null, bool tracked = true);
     }
 }

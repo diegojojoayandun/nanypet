@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NanyPet.Api.Models
@@ -14,7 +12,7 @@ namespace NanyPet.Api.Models
         [Key] // primary key
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
         public int Id { get; set; }
-        [Required(ErrorMessage ="Email Address is requiered")]
+        [Required(ErrorMessage = "Email Address is requiered")]
         [EmailAddress]
         public string Email { get; set; } = null!;
         [Required(ErrorMessage = "Password is requiered")]
