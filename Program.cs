@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NanyPet;
 using NanyPet.Api.Models;
+using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Repositories;
 using System.Text;
 

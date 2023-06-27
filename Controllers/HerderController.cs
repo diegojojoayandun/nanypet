@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
+using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Herder;
-using NanyPet.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace NanyPet.Controllers

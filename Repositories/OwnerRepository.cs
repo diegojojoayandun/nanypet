@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NanyPet.Api.Models;
 using NanyPet.Api.Repositories;
+using NanyPet.Api.Repositories.IRepository;
 using System.Linq.Expressions;
 
 namespace NanyPet.Repositories

@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.User;
+using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Api.Utils;
-using NanyPet.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace NanyPet.Api.Controllers
