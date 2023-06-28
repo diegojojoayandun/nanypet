@@ -5,6 +5,7 @@ using NanyPet.Api.Models.Dto.User;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Api.Utils;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace NanyPet.Api.Controllers
 {
@@ -16,13 +17,19 @@ namespace NanyPet.Api.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        protected APIResponse _apiResponse;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger, IMapper mapper, IConfiguration configuration)
+        public UserController(
+            IUserRepository userRepository, 
+            ILogger<UserController> logger, 
+            IMapper mapper, 
+            IConfiguration configuration)
         {
             _logger = logger;
             _userRepository = userRepository;
             _mapper = mapper;
             _configuration = configuration;
+            _apiResponse = new APIResponse();
         }
 
         /// <summary>
@@ -36,17 +43,28 @@ namespace NanyPet.Api.Controllers
             Description = "Obtiene un listado de los usuarios registrados",
             OperationId = "GetAllUsers",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
+        public async Task<ActionResult<APIResponse>> GetAllUsers()
         {
-            _logger.LogInformation("Obteniendo lista de usuarios"); // log -> show information on VS terminal
-            IEnumerable<User> userList = await _userRepository.GetAll();
-            return Ok(_mapper.Map<IEnumerable<UserDto>>(userList));
+            try
+            {
+                _logger.LogInformation("Obteniendo lista de usuarios");
+                IEnumerable<User> userList = await _userRepository.GetAll();
+                _apiResponse.Result = _mapper.Map<IEnumerable<UserDto>>(userList);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
         }
 
         /// <summary>
         /// Retrieves a specific User by Id
         /// </summary>
-        /// <param id="1">The herder id</param>
+        /// <param id="1">The User id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">user not found</response>
@@ -59,20 +77,37 @@ namespace NanyPet.Api.Controllers
             Description = "Obtiene usuario por Id",
             OperationId = "GetUserById",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<UserDto>> GetUserById(int id)
+        public async Task<ActionResult<APIResponse>> GetUserById(int id)
         {
-            if (id == 0)
-                return BadRequest();
-
-            var user = await _userRepository.GetById(v => v.Id == id);
-
-            if (user == null)
+            try
             {
-                _logger.LogError("No hay datos asociados a ese Id");
-                return NotFound();
-            }
+                if (id == 0)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
 
-            return Ok(_mapper.Map<UserDto>(user));
+                var user = await _userRepository.GetById(v => v.Id == id);
+
+                if (user == null)
+                {
+                    _logger.LogError("No hay datos asociados a ese Id");
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                _apiResponse.Result = _mapper.Map<UserDto>(user);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.Message };
+            }
+            return _apiResponse;
 
         }
 
@@ -92,20 +127,37 @@ namespace NanyPet.Api.Controllers
             Description = "Obtiene usuario por email",
             OperationId = "GetUserByEmail",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
+        public async Task<ActionResult<APIResponse>> GetUserByEmail(string email)
         {
-            if (email == null)
-                return BadRequest();
-
-            var user = await _userRepository.GetUserByEmail(v => v.Email == email);
-
-            if (user == null)
+            try
             {
-                _logger.LogError("No hay datos asociados a ese Id");
-                return NotFound();
-            }
+                if (email == null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
 
-            return Ok(_mapper.Map<UserDto>(user));
+                var user = await _userRepository.GetUserByEmail(v => v.Email == email);
+
+                if (user == null)
+                {
+                    _logger.LogError("No hay datos asociados a ese Id");
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                _apiResponse.Result = _mapper.Map<UserDto>(user);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
         }
 
         /// <summary>
@@ -124,48 +176,56 @@ namespace NanyPet.Api.Controllers
             Description = "Crea un nuevo usuario en la Base de datos",
             OperationId = "CreateUser",
             Tags = new[] { "Usuarios" })]
-        public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto createUserDto)
+        public async Task<ActionResult<APIResponse>> CreateUser([FromBody] UserCreateDto createUserDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (await _userRepository.GetUserByEmail(v => v.Email == createUserDto.Email) != null)
+            try
             {
-                ModelState.AddModelError("Usuario ya existe", "Ya existe un usuario registrado con ese Email!");
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                if (await _userRepository.GetUserByEmail(v => v.Email == createUserDto.Email) != null)
+                {
+                    ModelState.AddModelError("Usuario ya existe", "Ya existe un usuario registrado con email " + createUserDto.Email);
+                    return BadRequest(ModelState);
+                }
+
+                if (createUserDto == null)
+                    return BadRequest(createUserDto);
+
+                createUserDto.Password = PasswordHasher.HashPassword(createUserDto.Password);
+
+                User modelUser = _mapper.Map<User>(createUserDto);
+
+                await _userRepository.Create(modelUser);
+
+                _apiResponse.Result = modelUser;
+                _apiResponse.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetUser", new { id = modelUser.Id }, _apiResponse);
             }
-
-            if (createUserDto == null)
-                return BadRequest(createUserDto);
-
-            createUserDto.Password = PasswordHasher.HashPassword(createUserDto.Password);
-
-            User modelUser = _mapper.Map<User>(createUserDto);
-
-            await _userRepository.Create(modelUser);
-
-
-            return CreatedAtRoute("GetUser", new { id = modelUser.Id }, modelUser);
-
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
         }
 
         /// <summary>
         /// Update a specific Herder by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="id">The User id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
-        /// <response code="404">Product not found</response>
+        /// <response code="404">User not found</response>
         //[HttpPut]
         //[ProducesResponseType(StatusCodes.Status204NoContent)]
         //[ProducesResponseType(StatusCodes.Status400BadRequest)]
         //[ProducesResponseType(StatusCodes.Status404NotFound)]
         //[SwaggerOperation(
-        //    Summary = "Actualiza datos de Propietario de la mascota",
-        //    Description = "Actualiza datos de Propietario de la mascota",
-        //    OperationId = "UpdateOwner",
-        //    Tags = new[] { "Propietarios" })]
+        //    Summary = "Actualiza datos de Usuario",
+        //    Description = "Actualiza datos de Usario",
+        //    OperationId = "UpdateUser",
+        //    Tags = new[] { "Usuarios" })]
         //public async Task<IActionResult> UpdateOwner(int id, [FromBody] OwnerUpdateDto updateDto)
         //{
         //    if (updateDto == null || id != updateDto.Id)
