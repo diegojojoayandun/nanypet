@@ -4,6 +4,7 @@ using NanyPet.Api.Models;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Owner;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace NanyPet.Controllers
 {
@@ -14,6 +15,7 @@ namespace NanyPet.Controllers
         private readonly ILogger<OwnerController> _logger;
         private readonly IOwnerRepository _ownerRepository;
         private readonly IMapper _mapper;
+        protected APIResponse _apiResponse;
 
         public OwnerController(
             IOwnerRepository ownerRepository,
@@ -23,12 +25,13 @@ namespace NanyPet.Controllers
             _logger = logger;
             _ownerRepository = ownerRepository;
             _mapper = mapper;
+            _apiResponse = new APIResponse();
+
         }
 
         /// <summary>
-        /// Retrieves a list with all Herders
+        /// Retrieves a list with all Owners registered
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
         /// <response code="200">Herder's list retrieved</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -37,18 +40,29 @@ namespace NanyPet.Controllers
             Description = "Obtiene un listado de todos los propietarios registrados",
             OperationId = "GetAllOwners",
             Tags = new[] { "Propietarios" })]
-        public async Task<ActionResult<IEnumerable<OwnerDto>>> GetAllOwners()
+        public async Task<ActionResult<APIResponse>> GetAllOwners()
         {
-            _logger.LogInformation("Obteniendo lista de propietarios"); // log -> show information on VS terminal
-            IEnumerable<Owner> ownerList = await _ownerRepository.GetAll();
-            return Ok(_mapper.Map<IEnumerable<OwnerDto>>(ownerList));
+            try
+            {
+                _logger.LogInformation("Obteniendo lista de propietarios"); // log -> show information on VS terminal
+                IEnumerable<Owner> ownerList = await _ownerRepository.GetAll();
+                _apiResponse.Result = _mapper.Map<IEnumerable<OwnerDto>>(ownerList);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+
+            return _apiResponse;
         }
 
         /// <summary>
-        /// Retrieves a specific Herder by unique id
+        /// Retrieves a specific Owner by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
@@ -61,25 +75,42 @@ namespace NanyPet.Controllers
             Description = "Obtiene cuidador por Id",
             OperationId = "GetOwnerById",
             Tags = new[] { "Propietarios" })]
-        public async Task<ActionResult<OwnerDto>> GetOwnerById(int id)
+        public async Task<ActionResult<APIResponse>> GetOwnerById(int id)
         {
-            if (id == 0)
-                return BadRequest();
-
-            var owner = await _ownerRepository.GetById(v => v.Id == id);
-
-            if (owner == null)
+            try
             {
-                _logger.LogError("No hay datos asociados a ese Id");
-                return NotFound();
-            }
+                if (id == 0)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
 
-            return Ok(_mapper.Map<OwnerDto>(owner));
+                var owner = await _ownerRepository.GetById(v => v.Id == id);
+
+                if (owner == null)
+                {
+                    _logger.LogError("No hay datos asociados a ese Id");
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                _apiResponse.Result = _mapper.Map<OwnerDto>(owner);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _apiResponse;
 
         }
 
         /// <summary>
-        /// Create a Herder in the database
+        /// Create a Owner in the database
         /// </summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -90,38 +121,47 @@ namespace NanyPet.Controllers
             Description = "Crea un nuevo propietario en la Base de datos",
             OperationId = "CreateOwner",
             Tags = new[] { "Propietarios" })]
-        public async Task<ActionResult<OwnerDto>> CreateOwner([FromBody] OwnerCreateDto createOwnerDto)
+        public async Task<ActionResult<APIResponse>> CreateOwner([FromBody] OwnerCreateDto createOwnerDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            if (await _ownerRepository.GetByEmail(v => v.EmailUser == createOwnerDto.EmailUser) != null)
+                if (await _ownerRepository.GetByEmail(v => v.EmailUser == createOwnerDto.EmailUser) != null)
+                {
+                    ModelState.AddModelError("Propietario ya existe", "Ya hay registrado un propietario con ese Id!");
+                    return BadRequest(ModelState);
+                }
+
+                if (createOwnerDto == null)
+                {
+                    return BadRequest(createOwnerDto);
+                }
+
+                Owner modelOwner = _mapper.Map<Owner>(createOwnerDto);
+
+                await _ownerRepository.Create(modelOwner);
+
+                _apiResponse.Result = modelOwner;
+                _apiResponse.StatusCode = HttpStatusCode.Created;
+
+                return CreatedAtRoute("GetOwner", new { id = modelOwner.Id }, _apiResponse);
+            }
+            catch (Exception ex)
             {
-                ModelState.AddModelError("Propietario ya existe", "Ya hay registrado un propietario con ese Id!");
-                return BadRequest(ModelState);
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
             }
-
-            if (createOwnerDto == null)
-            {
-                return BadRequest(createOwnerDto);
-            }
-
-            Owner modelOwner = _mapper.Map<Owner>(createOwnerDto);
-
-            await _ownerRepository.Create(modelOwner);
-
-
-            return CreatedAtRoute("GetOwner", new { id = modelOwner.Id }, modelOwner);
-
+            return _apiResponse;
         }
 
         /// <summary>
-        /// Update a specific Herder by unique id
+        /// Update a specific Owner by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
@@ -136,23 +176,33 @@ namespace NanyPet.Controllers
             Tags = new[] { "Propietarios" })]
         public async Task<IActionResult> UpdateOwner(int id, [FromBody] OwnerUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.Id)
+            try
             {
-                return BadRequest();
+                if (updateDto == null || id != updateDto.Id)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+
+                Owner modelOwner = _mapper.Map<Owner>(updateDto);
+
+                await _ownerRepository.Update(modelOwner);
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                return Ok(_apiResponse);
             }
-
-            Owner modelOwner = _mapper.Map<Owner>(updateDto);
-
-            await _ownerRepository.Update(modelOwner);
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return BadRequest(_apiResponse);
         }
 
         /// <summary>
-        /// Delete a specific Herder by unique id
+        /// Delete a specific Owner by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
@@ -167,16 +217,35 @@ namespace NanyPet.Controllers
             Tags = new[] { "Propietarios" })]
         public async Task<IActionResult> DeleteOwner(int id)
         {
-            if (id == 0)
-                return BadRequest();
+            try
+            {
+                if (id == 0)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
 
-            var owner = await _ownerRepository.GetById(v => v.Id == id);
 
-            if (owner == null)
-                return NotFound();
+                var owner = await _ownerRepository.GetById(v => v.Id == id);
 
-            await _ownerRepository.Delete(owner);
-            return NoContent();
+                if (owner == null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                await _ownerRepository.Delete(owner);
+                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return BadRequest(_apiResponse);
         }
     }
 }
