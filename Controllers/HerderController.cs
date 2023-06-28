@@ -29,12 +29,11 @@ namespace NanyPet.Controllers
             _apiResponse = new APIResponse();
         }
 
+
         /// <summary>
-        /// Retorna una lista de todos los cuidadores registrados
+        /// Retieves a List with all registered herders
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
         /// <response code="200">Herder's list retrieved</response>
-        /// 
         //[Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -53,11 +52,9 @@ namespace NanyPet.Controllers
                 _apiResponse.Result = _mapper.Map<IEnumerable<HerderDto>>(herderList);
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 return Ok(_apiResponse);
-
             }
             catch (Exception ex)
             {
-
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
             }
@@ -66,14 +63,14 @@ namespace NanyPet.Controllers
             
         }
 
+
         /// <summary>
         /// Retrieves a specific Herder by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="herder id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
-        /// <response code="404">Product not found</response>
+        /// <response code="404">herder not found</response>
         [HttpGet("{id}", Name = "GetHerder")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -96,7 +93,6 @@ namespace NanyPet.Controllers
                     return BadRequest(_apiResponse);
                 }
                 
-
                 var herder = await _herderRepository.GetById(v => v.Id == id);
 
                 if (herder == null)
@@ -114,7 +110,6 @@ namespace NanyPet.Controllers
             }
             catch (Exception ex)
             {
-
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
             }
@@ -122,6 +117,13 @@ namespace NanyPet.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves a specific Herder by unique email
+        /// </summary>
+        /// <param email="user@example.com">The herder email</param>
+        /// <response code="200">herder retrieved</response>
+        /// <response code="400">bad request</response>
+        /// <response code="404">herder not found</response>
         [HttpGet("email/{email}", Name = "GetByMail")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -143,7 +145,6 @@ namespace NanyPet.Controllers
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-
 
                 var herder = await _herderRepository.GetByEmail(v => v.EmailUser == email);
 
@@ -167,6 +168,7 @@ namespace NanyPet.Controllers
 
             return _apiResponse;
         }
+
 
         /// <summary>
         /// Create a Herder in the database
@@ -205,7 +207,6 @@ namespace NanyPet.Controllers
                 await _herderRepository.Create(modelHerder);
                 _apiResponse.Result = modelHerder;
                 _apiResponse.StatusCode = HttpStatusCode.Created;
-
                 return CreatedAtRoute("GetHerder", new { id = modelHerder.Id }, _apiResponse);
 
             }
@@ -221,8 +222,7 @@ namespace NanyPet.Controllers
         /// <summary>
         /// Update a specific Herder by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="herder Id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
@@ -250,7 +250,6 @@ namespace NanyPet.Controllers
 
                 await _herderRepository.Update(modelHerder);
                 _apiResponse.StatusCode = HttpStatusCode.NoContent;
-
                 return Ok(_apiResponse);
             }
             catch (Exception ex)
@@ -264,8 +263,7 @@ namespace NanyPet.Controllers
         /// <summary>
         /// Delete a specific Herder by unique id
         /// </summary>
-        /// <remarks>Awesomeness!</remarks>
-        /// <param id="id" id="123">The herder id</param>
+        /// <param id="herder Id">The herder id</param>
         /// <response code="200">herder retrieved</response>
         /// <response code="400">bad request</response>
         /// <response code="404">Product not found</response>
