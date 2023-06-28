@@ -60,7 +60,7 @@ namespace NanyPet.Controllers
             }
 
             return _apiResponse;
-            
+
         }
 
 
@@ -92,7 +92,7 @@ namespace NanyPet.Controllers
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-                
+
                 var herder = await _herderRepository.GetById(v => v.Id == id);
 
                 if (herder == null)
@@ -286,7 +286,7 @@ namespace NanyPet.Controllers
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-                
+
                 var herder = await _herderRepository.GetById(v => v.Id == id);
 
                 if (herder == null)
