@@ -4,13 +4,6 @@ namespace NanyPet.Models.Dto.Owner
 {
     public class OwnerCreateDto
     {
-
-        [Required]
-        [MaxLength(30)]
-        public string? FirstName { get; set; }
-        [Required]
-        [MaxLength(30)]
-        public string? LastName { get; set; }
         [Required]
         [EmailAddress]
         [MaxLength(60)]

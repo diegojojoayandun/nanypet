@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using NanyPet.Api.Models.Dto.User;
+using NanyPet.Api.Models.Dto.Login;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Api.Utils;
 using System.IdentityModel.Tokens.Jwt;
@@ -79,35 +79,35 @@ namespace GoogleAuth.Controllers
 
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto user)
-        {
-            // Validate user credentials
-            if (await IsValidUserCredentials(user.Email, user.Password) == false)
-            {
-                return Unauthorized(); // Return 401 Unauthorized if credentials are invalid
-            }
+        //[HttpPost("login")]
+        //public async Task<IActionResult> Login([FromBody] UserDto user)
+        //{
+        //    // Validate user credentials
+        //    if (await IsValidUserCredentials(user.Email, user.Password) == false)
+        //    {
+        //        return Unauthorized(); // Return 401 Unauthorized if credentials are invalid
+        //    }
 
-            // If authentication succeeds, generate and return a JWT token
-            var token = GenerateJwtToken(user.Email);
+        //    // If authentication succeeds, generate and return a JWT token
+        //    var token = GenerateJwtToken(user.Email);
 
-            return Ok(new { token });
-        }
+        //    return Ok(new { token });
+        //}
 
-        private async Task<bool> IsValidUserCredentials(string email, string password)
-        {
-            // Perform your user authentication logic here
+        //private async Task<bool> IsValidUserCredentials(string email, string password)
+        //{
+        //    // Perform your user authentication logic here
 
-            if (email == null || password == null)
-                return false;
+        //    if (email == null || password == null)
+        //        return false;
 
-            var UserData = await _userRepository.GetUserByEmail(v => v.Email == email);
+        //    var UserData = await _userRepository.GetUserByEmail(v => v.Email == email);
 
-            if (UserData != null && UserData.Email == email && PasswordHasher.VerifyPassword(password, UserData.Password))
-                return true;
+        //    if (UserData != null && UserData.Email == email && PasswordHasher.VerifyPassword(password, UserData.Password))
+        //        return true;
 
-            return false;
-        }
+        //    return false;
+        //}
 
         private string GenerateJwtToken(string user)
         {

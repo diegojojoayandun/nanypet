@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NanyPet.Api.Models;
+using NanyPet.Api.Models.Specifications;
 using NanyPet.Api.Repositories.IRepository;
 using System.Linq.Expressions;
 
@@ -35,6 +36,16 @@ namespace NanyPet.Api.Repositories
                 query = query.Where(filter);
 
             return await query.ToListAsync();
+        }
+
+        public PagedList<T> GetAllPaginated(Parameters parameters, Expression<Func<T, bool>>? filter = null)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            return PagedList<T>.ToPagedList(query, parameters.PageNumber, parameters.PageSize);
         }
 
         public async Task<T?> GetById(Expression<Func<T, bool>>? filter = null, bool tracked = true)

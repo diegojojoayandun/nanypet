@@ -17,7 +17,6 @@ namespace NanyPet.Api.Models
         public virtual DbSet<Herder> Herders { get; set; } = null!;
         public virtual DbSet<Owner> Owners { get; set; } = null!;
         public virtual DbSet<Pet> Pets { get; set; } = null!;
-        public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -89,14 +88,6 @@ namespace NanyPet.Api.Models
                     .HasMaxLength(60)
                     .HasColumnName("email_user");
 
-                entity.Property(e => e.FirstName)
-                    .HasMaxLength(30)
-                    .HasColumnName("first_name");
-
-                entity.Property(e => e.LastName)
-                    .HasMaxLength(30)
-                    .HasColumnName("last_name");
-
                 entity.Property(e => e.Location)
                     .HasMaxLength(100)
                     .HasColumnName("location");
@@ -137,13 +128,6 @@ namespace NanyPet.Api.Models
                     .HasMaxLength(60)
                     .HasColumnName("email_user");
 
-                entity.Property(e => e.FirstName)
-                    .HasMaxLength(30)
-                    .HasColumnName("first_name");
-
-                entity.Property(e => e.LastName)
-                    .HasMaxLength(30)
-                    .HasColumnName("last_name");
 
                 entity.Property(e => e.Location)
                     .HasMaxLength(100)
@@ -198,16 +182,6 @@ namespace NanyPet.Api.Models
                     .HasConstraintName("fk_pet_owner");
             });
 
-            modelBuilder.Entity<Role>(entity =>
-            {
-                entity.ToTable("roles");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.RoleName)
-                    .HasMaxLength(20)
-                    .HasColumnName("role_name");
-            });
 
             modelBuilder.Entity<User>(entity =>
             {
@@ -215,8 +189,6 @@ namespace NanyPet.Api.Models
 
                 entity.HasIndex(e => e.Email, "email")
                     .IsUnique();
-
-                entity.HasIndex(e => e.RoleId, "role_id");
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
@@ -228,12 +200,7 @@ namespace NanyPet.Api.Models
                     .HasMaxLength(30)
                     .HasColumnName("password");
 
-                entity.Property(e => e.RoleId).HasColumnName("role_id");
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("users_ibfk_1");
+                
             });
 
             OnModelCreatingPartial(modelBuilder);

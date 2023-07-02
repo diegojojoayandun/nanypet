@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using NanyPet.Api.Models;
-using NanyPet.Api.Models.Dto.User;
+using NanyPet.Api.Models.Dto.Login;
 using NanyPet.Models.Dto.Herder;
 using NanyPet.Models.Dto.Owner;
 

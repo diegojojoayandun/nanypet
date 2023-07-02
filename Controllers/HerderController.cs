@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
+using NanyPet.Api.Models.Specifications;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Herder;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using System.Reflection.Metadata;
 
 namespace NanyPet.Controllers
 {
@@ -34,8 +37,9 @@ namespace NanyPet.Controllers
         /// Retieves a List with all registered herders
         /// </summary>
         /// <response code="200">Herder's list retrieved</response>
-        //[Authorize]
         [HttpGet]
+        [ResponseCache(Duration = 60)]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(
@@ -57,6 +61,40 @@ namespace NanyPet.Controllers
             {
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+            }
+
+            return _apiResponse;
+
+        }
+
+        /// <summary>
+        /// Retieves a List with all registered herders paginated
+        /// </summary>
+        /// <response code="200">Paginated Herder's list retrieved</response>
+        [HttpGet("HerderPaginated")]
+        [ResponseCache(Duration = 60)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [SwaggerOperation(
+            Summary = "Obtiene un listado de todos los cuidadores registrados",
+            Description = "Obtiene un listado de todos los cuidadores registrados",
+            OperationId = "GetAllHerdersPaginated",
+            Tags = new[] { "Cuidadores" })]
+        public ActionResult<APIResponse> GetAllHerdersPaginated([FromQuery] Parameters parameters)
+        {
+            try
+            {
+                _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
+                var herderList =  _herderRepository.GetAllPaginated(parameters);
+                _apiResponse.Result = _mapper.Map<IEnumerable<HerderDto>>(herderList);
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.TotalPages = herderList.MetaData.TotalPages;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.ErrorMessages = new List<string> { ex.Message.ToString() };
             }
 
             return _apiResponse;
@@ -213,7 +251,7 @@ namespace NanyPet.Controllers
             catch (Exception ex)
             {
                 _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+                _apiResponse.ErrorMessages = new List<string> { ex.Message.ToString() };
             }
 
             return _apiResponse;

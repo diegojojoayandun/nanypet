@@ -153,7 +153,7 @@ namespace NanyPet.Controllers
             catch (Exception ex)
             {
                 _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { ex.ToString() };
+                _apiResponse.ErrorMessages = new List<string> { ex.Message.ToString() };
             }
             return _apiResponse;
         }
