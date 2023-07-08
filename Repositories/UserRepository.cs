@@ -44,7 +44,7 @@ namespace NanyPet.Repositories
             if (user != null && user.Email.ToLower() == loginRequestDTO.EmailUser.ToLower() &&
                 PasswordHasher.VerifyPassword(loginRequestDTO.Password, user.Password))
             {
-                var token = GenerateJwtToken(user);
+                var token = GenerateJwtToken(user.Email);
                 LoginResponseDTO loginResponseDTO = new()
                 {
                     Token = token,
@@ -60,7 +60,7 @@ namespace NanyPet.Repositories
             };
         }
 
-        public string GenerateJwtToken(User user)
+        public string GenerateJwtToken(string user)
         {
             // Header
 
@@ -72,8 +72,8 @@ namespace NanyPet.Repositories
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Rol)
+                new Claim(ClaimTypes.Name, user),
+                //new Claim(ClaimTypes.Role, user.Rol)
             };
 
             // Payload

@@ -1,17 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NanyPet.Api.Models.Common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NanyPet.Api.Models
 {
-    public partial class Herder
+    public partial class Herder : AuditableBaseModel
     {
         public Herder()
         {
             Appointments = new HashSet<Appointment>();
         }
-        [Key] // primary key
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
-        public int Id { get; set; }
         [Required]
         [EmailAddress]
         [StringLength(60)]

@@ -36,9 +36,15 @@ namespace NanyPet.Api.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("appointment_time");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("HerderId")
                         .HasColumnType("int")
                         .HasColumnName("herder_id");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text")
@@ -74,11 +80,17 @@ namespace NanyPet.Api.Migrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("city");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("EmailUser")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("varchar(60)")
                         .HasColumnName("email_user");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Location")
                         .HasMaxLength(100)
@@ -119,11 +131,17 @@ namespace NanyPet.Api.Migrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("city");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("EmailUser")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("varchar(60)")
                         .HasColumnName("email_user");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Location")
                         .HasMaxLength(100)
@@ -166,11 +184,17 @@ namespace NanyPet.Api.Migrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("breed");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("gender");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -203,6 +227,9 @@ namespace NanyPet.Api.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(60)
@@ -211,6 +238,9 @@ namespace NanyPet.Api.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
                         .HasColumnType("longtext");

@@ -1,17 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NanyPet.Api.Models.Common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NanyPet.Api.Models
 {
-    public partial class User
+    public partial class User : AuditableBaseModel
     {
         public User()
         {
             Herders = new HashSet<Herder>();
         }
-        [Key] // primary key
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
-        public int Id { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         [Required(ErrorMessage = "Email Address is requiered")]

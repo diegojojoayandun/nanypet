@@ -7,7 +7,6 @@ using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Herder;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using System.Reflection.Metadata;
 
 namespace NanyPet.Controllers
 {

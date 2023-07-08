@@ -1,13 +1,14 @@
-﻿namespace NanyPet.Api.Models
+﻿using NanyPet.Api.Models.Common;
+
+namespace NanyPet.Api.Models
 {
-    public partial class Pet
+    public partial class Pet : AuditableBaseModel
     {
         public Pet()
         {
             Appointments = new HashSet<Appointment>();
         }
 
-        public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string Species { get; set; } = null!;
         public string Breed { get; set; } = null!;

@@ -1,33 +1,39 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.Login;
 using NanyPet.Api.Repositories.IRepository;
-using NanyPet.Api.Utils;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using System.Security.Claims;
 
 namespace NanyPet.Api.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<UserController> _logger;
         protected APIResponse _apiResponse;
 
         public UserController(
             IUserRepository userRepository, 
-            IMapper mapper, 
-            IConfiguration configuration)
+            IMapper mapper,
+            IConfiguration configuration,
+            ILogger<UserController> logger)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _configuration = configuration;
             _apiResponse = new APIResponse();
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,6 +53,7 @@ namespace NanyPet.Api.Controllers
             Tags = new[] { "Usuarios" })]
         public async Task<IActionResult> SignIn([FromBody] LoginRequestDTO model)
         { 
+
             var loginResponse = await _userRepository.SignIn(model);
             if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
             { 
@@ -57,6 +64,7 @@ namespace NanyPet.Api.Controllers
             }
             _apiResponse.StatusCode = HttpStatusCode.OK;
             _apiResponse.Result = loginResponse;
+            _logger.LogInformation("Login Exitoso!");
             return Ok(_apiResponse);
         }
 
@@ -100,7 +108,86 @@ namespace NanyPet.Api.Controllers
             return Ok(_apiResponse);
         }
 
+        /// <summary>
+        /// Google Login
+        /// </summary>
+        /// <response code=200>Successful login</response>
+        /// <response code=400>Bad Request</response>
+        /// <response code=500>Internal Server Error</response>
+        [HttpGet("signin-google")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [SwaggerOperation(
+            Summary = "Google Login",
+            Description = "Google Login",
+            OperationId = "GoogleAuth",
+            Tags = new[] { "Usuarios" })]
+        public IActionResult GoogleAuth()
+        {
+            try
+            {
+                var authenticationProperties = new AuthenticationProperties
+                {
+                    RedirectUri = Url.Action(nameof(GoogleAuthCallback))
+                };
 
+                return Challenge(authenticationProperties, GoogleDefaults.AuthenticationScheme);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogInformation(ex.Message.ToString());
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// Google Login
+        /// </summary>
+        /// <response code=200>Successful login</response>
+        /// <response code=400>Bad Request</response>
+        /// <response code=500>Internal Server Error</response>
+        [HttpGet("handle-google-callback")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [SwaggerOperation(
+            Summary = "Google Login Callback",
+            Description = "Google Login Callback returns token from user",
+            OperationId = "GoogleAuthCallback",
+            Tags = new[] { "Usuarios" })]
+        public async Task<IActionResult> GoogleAuthCallback()
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (authenticateResult.Succeeded)
+            {
+                //// Authentication successful, handle the user's information.
+                //var user = authenticateResult.Principal;
+
+                //// Retrieve user's email
+                //var userEmail = user.FindFirstValue(ClaimTypes.Email);
+
+                //// Retrieve user's name
+                //var userName = user.FindFirstValue(ClaimTypes.Name);
+
+                //// Redirect or perform further actions.
+                //// For example, you can return a success message or redirect to a specific URL.
+                //return Ok(new { Email = userEmail, Name = userName });
+                ////return RedirectToAction("GetAllUsers", "UserController", new { Email = userEmail, Name = userName });
+                var user = authenticateResult.Principal;
+                var userEmail = user.FindFirstValue(ClaimTypes.Email);
+
+
+                var token = _userRepository.GenerateJwtToken(userEmail);
+
+                return Ok(new { token });
+            }
+            else
+            {
+
+                // Authentication failed, handle the error.
+                return Unauthorized();
+            }
+
+
+        }
 
         ///// <summary>
         ///// Retrieves a list with all users

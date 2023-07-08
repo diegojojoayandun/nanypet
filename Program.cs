@@ -1,6 +1,7 @@
 using DotEnv.Core;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -66,6 +67,9 @@ builder.Services.AddDbContext<nanypetContext>(option =>
     option.UseMySql(Configuration["CONNECTION_STRING"], ServerVersion.Parse("8.0.30-mysql"));
 
 });
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<nanypetContext>();   
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
