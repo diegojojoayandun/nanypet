@@ -1,5 +1,4 @@
-﻿using NanyPet.Api.Models;
-using NanyPet.Api.Models.Dto.Login;
+﻿using NanyPet.Api.Models.Dto.Login;
 
 namespace NanyPet.Api.Repositories.IRepository
 {

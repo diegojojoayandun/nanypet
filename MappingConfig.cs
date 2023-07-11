@@ -10,18 +10,18 @@ namespace NanyPet
     {
         public MappingConfig()
         {
+            // Herder Mappings
             CreateMap<Herder, HerderDto>().ReverseMap();
             CreateMap<Herder, HerderCreateDto>().ReverseMap();
             CreateMap<Herder, HerderUpdateDto>().ReverseMap();
 
+            // Owner Mappings
             CreateMap<Owner, OwnerDto>().ReverseMap();
             CreateMap<Owner, OwnerCreateDto>().ReverseMap();
             CreateMap<Owner, OwnerUpdateDto>().ReverseMap();
 
-
+            // User Mappings
             CreateMap<User, UserDto>().ReverseMap();
-            //CreateMap<User, UserCreateDto>().ReverseMap();
-            // CreateMap<Owner, OwnerUpdateDto>().ReverseMap();
         }
     }
 }

@@ -66,6 +66,5 @@ namespace NanyPet.Api.Repositories
             _context.Update(entity);
             await _context.SaveChangesAsync();
         }
-
     }
 }

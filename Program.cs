@@ -5,17 +5,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Validations;
 using NanyPet;
 using NanyPet.Api.Models;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Repositories;
-//using NanyPet.Api.Repositories.IRepository;
-//using NanyPet.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 
 // Add services to the container.
@@ -31,8 +27,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger  
-
+// Swagger, Custom for Bearer Authorization  
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations();
@@ -65,15 +60,13 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddResponseCaching();
 
-string cade = Configuration["CONNECTION_STRING"];
-
+// DbContext
 builder.Services.AddDbContext<nanypetContext>(option =>
 {
-    //option.UseMySql(Configuration["CONNECTION_STRING"], ServerVersion.Parse("8.0.30-mysql"));
     option.UseSqlServer(Configuration["CONNECTION_STRING"]);
-
 });
 
+// Add Identity
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<nanypetContext>();
 
@@ -83,12 +76,11 @@ builder.Services.AddScoped<IHerderRepository, HerderRepository>();
 builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-
+// JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    //options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
 }).AddJwtBearer(options =>
 {
@@ -104,7 +96,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
+// External Authentication(Google, Facebook, ...)
 builder.Services.AddAuthentication(options =>
 {
 
@@ -113,7 +105,7 @@ builder.Services.AddAuthentication(options =>
     .AddCookie(options =>
 {
     options.LoginPath = "/api/signin-google";
-    //options.LoginPath = "/account/facebook-login";
+    // options.LoginPath = "/account/facebook-login";
 })
 .AddGoogle(options =>
 {
@@ -127,7 +119,6 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -139,9 +130,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//app.UseCors();
 app.UseRouting();
-
 
 app.UseAuthentication();
 

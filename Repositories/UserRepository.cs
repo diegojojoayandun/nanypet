@@ -20,7 +20,12 @@ namespace NanyPet.Repositories
         private readonly RoleManager<IdentityRole> _roleManager;
 
 
-        public UserRepository(nanypetContext context, IConfiguration configuration, UserManager<User> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        public UserRepository(
+            nanypetContext context, 
+            IConfiguration configuration, 
+            UserManager<User> userManager, 
+            IMapper mapper, 
+            RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _configuration = configuration;
@@ -56,8 +61,6 @@ namespace NanyPet.Repositories
                     User = null
                 };
                 
-            
-
             bool isUserValid = await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
 
             if (!isUserValid)            
@@ -67,7 +70,6 @@ namespace NanyPet.Repositories
                     User = null
                 };
             
-
             IList<string> roles = await _userManager.GetRolesAsync(user);
 
             if (roles == null)
@@ -136,7 +138,6 @@ namespace NanyPet.Repositories
                 NormalizedEmail = registerRequestDTO.Email.ToUpper(),
                 FirstName = registerRequestDTO.FirstName,
                 LastName = registerRequestDTO.LastName,
-
             };
 
             try
@@ -155,11 +156,8 @@ namespace NanyPet.Repositories
             }
             catch (Exception)
             {
-
                 throw;
             }
             return new UserDto();        }
-
-        
     }
 }
