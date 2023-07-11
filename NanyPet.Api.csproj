@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\AuthController.cs" />
     <Compile Remove="Controllers\AuthenticationController.cs" />
   </ItemGroup>
 
