@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Dto.Login;
 using NanyPet.Api.Repositories.IRepository;
-using NanyPet.Api.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,12 +15,18 @@ namespace NanyPet.Repositories
     {
         private readonly nanypetContext _context;
         private readonly IConfiguration _configuration;
+        private readonly UserManager<User> _userManager;
+        private readonly IMapper _mapper;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
 
-        public UserRepository(nanypetContext context, IConfiguration configuration)
+        public UserRepository(nanypetContext context, IConfiguration configuration, UserManager<User> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _configuration = configuration;
+            _userManager = userManager;
+            _mapper = mapper;
+            _roleManager = roleManager;
         }
 
         public bool IsUniqueUser(string userName)
@@ -40,27 +47,49 @@ namespace NanyPet.Repositories
 
         public async Task<LoginResponseDTO> SignIn(LoginRequestDTO loginRequestDTO)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == loginRequestDTO.EmailUser.ToLower());
-            if (user != null && user.Email.ToLower() == loginRequestDTO.EmailUser.ToLower() &&
-                PasswordHasher.VerifyPassword(loginRequestDTO.Password, user.Password))
-            {
-                var token = GenerateJwtToken(user.Email);
-                LoginResponseDTO loginResponseDTO = new()
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginRequestDTO.UserName.ToLower());
+
+            if (user == null)            
+                return new LoginResponseDTO()
                 {
-                    Token = token,
-                    User = user
+                    Token = "",
+                    User = null
                 };
-                return loginResponseDTO;
+                
+            
+
+            bool isUserValid = await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
+
+            if (!isUserValid)            
+                return new LoginResponseDTO()
+                {
+                    Token = "",
+                    User = null
+                };
+            
+
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+
+            if (roles == null)
+            {
+                return new LoginResponseDTO()
+                {
+                    Token = "",
+                    User = null
+                };
             }
 
-            return new LoginResponseDTO()
+            var token = GenerateJwtToken(user.UserName, roles);
+            LoginResponseDTO loginResponseDTO = new()
             {
-                Token = "",
-                User = null
+                Token = token,
+                User = _mapper.Map<UserDto>(user),
             };
+            return loginResponseDTO;
+
         }
 
-        public string GenerateJwtToken(string user)
+        public string GenerateJwtToken(string user, IList<string> roles)
         {
             // Header
 
@@ -70,11 +99,18 @@ namespace NanyPet.Repositories
 
             // Claims
 
-            var claims = new List<Claim>
+            var claims = new List<Claim>();
+            var role = roles.FirstOrDefault();
+
+            if (user != null)
             {
-                new Claim(ClaimTypes.Name, user),
-                //new Claim(ClaimTypes.Role, user.Rol)
-            };
+                claims.Add(new Claim(ClaimTypes.Name, user));
+            }
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             // Payload
 
@@ -91,20 +127,39 @@ namespace NanyPet.Repositories
 
         }
 
-        public async Task<User> SignUp(RegisterRequestDTO registerRequestDTO)
+        public async Task<UserDto> SignUp(RegisterRequestDTO registerRequestDTO)
         {
             User user = new()
             {
+                UserName = registerRequestDTO.Email,
                 Email = registerRequestDTO.Email,
-                Password = PasswordHasher.HashPassword(registerRequestDTO.Password),
+                NormalizedEmail = registerRequestDTO.Email.ToUpper(),
                 FirstName = registerRequestDTO.FirstName,
                 LastName = registerRequestDTO.LastName,
-                Rol = registerRequestDTO.Rol
+
             };
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
+            try
+            {
+                var result = await _userManager.CreateAsync(user, registerRequestDTO.Password);
+                if (result.Succeeded) 
+                {
+                    if (!_roleManager.RoleExistsAsync(registerRequestDTO.Rol).GetAwaiter().GetResult())
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(registerRequestDTO.Rol));
+                    }
+                    await _userManager.AddToRoleAsync(user, registerRequestDTO.Rol);
+                    var userApp = _context.Users.FirstOrDefault(u=>u.UserName == registerRequestDTO.Email);
+                    return _mapper.Map<UserDto>(userApp);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return new UserDto();        }
+
+        
     }
 }

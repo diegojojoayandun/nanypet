@@ -20,7 +20,7 @@ namespace NanyPet
 
 
             CreateMap<User, UserDto>().ReverseMap();
-            CreateMap<User, UserCreateDto>().ReverseMap();
+            //CreateMap<User, UserCreateDto>().ReverseMap();
             // CreateMap<Owner, OwnerUpdateDto>().ReverseMap();
         }
     }

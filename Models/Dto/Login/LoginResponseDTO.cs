@@ -2,7 +2,9 @@
 {
     public class LoginResponseDTO
     {
-        public User? User { get; set; }
+        public UserDto? User { get; set; }
         public string? Token { get; set; } = null!;
+
+        //public string Rol { get; set; }
     }
 }

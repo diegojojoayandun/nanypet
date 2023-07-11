@@ -7,7 +7,7 @@ namespace NanyPet.Api.Models.Common
     {
         [Key] // primary key
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // autoincrement
-        public virtual int Id { get; set; }
+        public virtual string Id { get; set; } = null!;
         public DateTime Created { get; set; }
         public DateTime? LastModified { get; set; }
     }

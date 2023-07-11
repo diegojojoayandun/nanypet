@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace NanyPet.Api.Models
 {
-    public partial class nanypetContext : DbContext
+    public partial class nanypetContext : IdentityDbContext<User>
     {
         public nanypetContext()
         {
@@ -13,11 +14,11 @@ namespace NanyPet.Api.Models
         {
         }
 
-        public virtual DbSet<Appointment> Appointments { get; set; } = null!;
+        //public virtual DbSet<Appointment> Appointments { get; set; } = null!;
         public virtual DbSet<Herder> Herders { get; set; } = null!;
         public virtual DbSet<Owner> Owners { get; set; } = null!;
-        public virtual DbSet<Pet> Pets { get; set; } = null!;
-        public virtual DbSet<User> Users { get; set; } = null!;
+        //public virtual DbSet<Pet> Pets { get; set; } = null!;
+        public virtual new DbSet<User> Users { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -28,8 +29,7 @@ namespace NanyPet.Api.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.UseCollation("utf8mb4_0900_ai_ci")
-                .HasCharSet("utf8mb4");
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Appointment>(entity =>
             {
@@ -85,7 +85,6 @@ namespace NanyPet.Api.Models
                     .HasColumnName("city");
 
                 entity.Property(e => e.EmailUser)
-                    .HasMaxLength(60)
                     .HasColumnName("email_user");
 
                 entity.Property(e => e.Location)
@@ -100,9 +99,9 @@ namespace NanyPet.Api.Models
                     .HasMaxLength(30)
                     .HasColumnName("state");
 
-                entity.HasOne(d => d.EmailUserNavigation)
+                entity.HasOne(d => d.UserNameNavigation)
                     .WithMany(p => p.Herders)
-                    .HasPrincipalKey(p => p.Email)
+                    .HasPrincipalKey(p => p.UserName)
                     .HasForeignKey(d => d.EmailUser)
                     .HasConstraintName("herders_ibfk_1");
             });
@@ -125,7 +124,7 @@ namespace NanyPet.Api.Models
                     .HasColumnName("city");
 
                 entity.Property(e => e.EmailUser)
-                    .HasMaxLength(60)
+                    .HasMaxLength(256)
                     .HasColumnName("email_user");
 
 
@@ -141,67 +140,67 @@ namespace NanyPet.Api.Models
                     .HasMaxLength(30)
                     .HasColumnName("state");
 
-                entity.HasOne(d => d.EmailUserNavigation)
+                entity.HasOne(d => d.UserNameNavigation)
                     .WithOne(p => p.Owner)
                     .HasPrincipalKey<User>(p => p.Email)
                     .HasForeignKey<Owner>(d => d.EmailUser)
                     .HasConstraintName("owners_ibfk_1");
             });
 
-            modelBuilder.Entity<Pet>(entity =>
-            {
-                entity.ToTable("pets");
+            //modelBuilder.Entity<Pet>(entity =>
+            //{
+            //    entity.ToTable("pets");
 
-                entity.HasIndex(e => e.OwnerId, "fk_pet_owner");
+            //    entity.HasIndex(e => e.OwnerId, "fk_pet_owner");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+            //    entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.Age).HasColumnName("age");
+            //    entity.Property(e => e.Age).HasColumnName("age");
 
-                entity.Property(e => e.Breed)
-                    .HasMaxLength(30)
-                    .HasColumnName("breed");
+            //    entity.Property(e => e.Breed)
+            //        .HasMaxLength(30)
+            //        .HasColumnName("breed");
 
-                entity.Property(e => e.Gender)
-                    .HasMaxLength(20)
-                    .HasColumnName("gender");
+            //    entity.Property(e => e.Gender)
+            //        .HasMaxLength(20)
+            //        .HasColumnName("gender");
 
-                entity.Property(e => e.Name)
-                    .HasMaxLength(60)
-                    .HasColumnName("name");
+            //    entity.Property(e => e.Name)
+            //        .HasMaxLength(60)
+            //        .HasColumnName("name");
 
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+            //    entity.Property(e => e.OwnerId).HasColumnName("owner_id");
 
-                entity.Property(e => e.Species)
-                    .HasMaxLength(30)
-                    .HasColumnName("species");
+            //    entity.Property(e => e.Species)
+            //        .HasMaxLength(30)
+            //        .HasColumnName("species");
 
-                entity.HasOne(d => d.Owner)
-                    .WithMany(p => p.Pets)
-                    .HasForeignKey(d => d.OwnerId)
-                    .HasConstraintName("fk_pet_owner");
-            });
+            //    entity.HasOne(d => d.Owner)
+            //        .WithMany(p => p.Pets)
+            //        .HasForeignKey(d => d.OwnerId)
+            //        .HasConstraintName("fk_pet_owner");
+            //});
 
 
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.ToTable("users");
+            //modelBuilder.Entity<User>(entity =>
+            //{
+            //    entity.ToTable("users");
 
-                entity.HasIndex(e => e.Email, "email")
-                    .IsUnique();
+            //    entity.HasIndex(e => e.Email, "email")
+            //        .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+            //    entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.Email)
-                    .HasMaxLength(60)
-                    .HasColumnName("email");
+            //    entity.Property(e => e.Email)
+            //        .HasMaxLength(60)
+            //        .HasColumnName("email");
 
-                entity.Property(e => e.Password)
-                    .HasMaxLength(30)
-                    .HasColumnName("password");
+            //    entity.Property(e => e.Password)
+            //        .HasMaxLength(60)
+            //        .HasColumnName("password");
 
-                
-            });
+
+            //});
 
             OnModelCreatingPartial(modelBuilder);
         }

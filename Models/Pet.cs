@@ -14,7 +14,7 @@ namespace NanyPet.Api.Models
         public string Breed { get; set; } = null!;
         public int Age { get; set; }
         public string Gender { get; set; } = null!;
-        public int? OwnerId { get; set; }
+        public string? OwnerId { get; set; }
 
         public virtual Owner Owner { get; set; } = null!;
         public virtual ICollection<Appointment> Appointments { get; set; }

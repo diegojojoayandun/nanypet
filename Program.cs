@@ -5,10 +5,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Validations;
 using NanyPet;
 using NanyPet.Api.Models;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Repositories;
+//using NanyPet.Api.Repositories.IRepository;
+//using NanyPet.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,14 +65,17 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddResponseCaching();
 
+string cade = Configuration["CONNECTION_STRING"];
+
 builder.Services.AddDbContext<nanypetContext>(option =>
 {
-    option.UseMySql(Configuration["CONNECTION_STRING"], ServerVersion.Parse("8.0.30-mysql"));
+    //option.UseMySql(Configuration["CONNECTION_STRING"], ServerVersion.Parse("8.0.30-mysql"));
+    option.UseSqlServer(Configuration["CONNECTION_STRING"]);
 
 });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<nanypetContext>();   
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<nanypetContext>();
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 

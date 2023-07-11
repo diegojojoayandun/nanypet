@@ -12,7 +12,6 @@ namespace NanyPet.Api.Models
         }
         [Required]
         [EmailAddress]
-        [MaxLength(60)]
         public string EmailUser { get; set; } = null!;
         public string? Phone { get; set; }
         public string? Address { get; set; }
@@ -20,7 +19,7 @@ namespace NanyPet.Api.Models
         public string? State { get; set; }
         public string? Location { get; set; }
 
-        public virtual User EmailUserNavigation { get; set; } = null!;
+        public virtual User UserNameNavigation { get; set; } = null!;
         public virtual ICollection<Pet> Pets { get; set; }
     }
 }

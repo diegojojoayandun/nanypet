@@ -75,11 +75,11 @@ namespace NanyPet.Controllers
             Description = "Obtiene cuidador por Id",
             OperationId = "GetOwnerById",
             Tags = new[] { "Propietarios" })]
-        public async Task<ActionResult<APIResponse>> GetOwnerById(int id)
+        public async Task<ActionResult<APIResponse>> GetOwnerById(string id)
         {
             try
             {
-                if (id == 0)
+                if (id == "")
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -215,11 +215,11 @@ namespace NanyPet.Controllers
             Description = "Elimina los datos de propietario por su id",
             OperationId = "DeleteOwner",
             Tags = new[] { "Propietarios" })]
-        public async Task<IActionResult> DeleteOwner(int id)
+        public async Task<IActionResult> DeleteOwner(string id)
         {
             try
             {
-                if (id == 0)
+                if (id == "")
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;

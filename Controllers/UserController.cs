@@ -24,7 +24,7 @@ namespace NanyPet.Api.Controllers
         protected APIResponse _apiResponse;
 
         public UserController(
-            IUserRepository userRepository, 
+            IUserRepository userRepository,
             IMapper mapper,
             IConfiguration configuration,
             ILogger<UserController> logger)
@@ -52,11 +52,11 @@ namespace NanyPet.Api.Controllers
             OperationId = "signin",
             Tags = new[] { "Usuarios" })]
         public async Task<IActionResult> SignIn([FromBody] LoginRequestDTO model)
-        { 
+        {
 
             var loginResponse = await _userRepository.SignIn(model);
             if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
-            { 
+            {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages.Add("Usuario o Password son Icorrectos!");
@@ -87,7 +87,7 @@ namespace NanyPet.Api.Controllers
         {
             bool isUniqueUser = _userRepository.IsUniqueUser(model.Email);
 
-            if (!isUniqueUser) 
+            if (!isUniqueUser)
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
@@ -96,7 +96,7 @@ namespace NanyPet.Api.Controllers
             }
             var user = await _userRepository.SignUp(model);
 
-            if (user == null) 
+            if (user == null)
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
@@ -175,9 +175,9 @@ namespace NanyPet.Api.Controllers
                 var userEmail = user.FindFirstValue(ClaimTypes.Email);
 
 
-                var token = _userRepository.GenerateJwtToken(userEmail);
+               //var token = _userRepository.GenerateJwtToken(userEmail);
 
-                return Ok(new { token });
+                return Ok();
             }
             else
             {

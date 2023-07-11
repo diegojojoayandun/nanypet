@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.HttpSys;
 using NanyPet.Api.Models;
 using NanyPet.Api.Models.Specifications;
 using NanyPet.Api.Repositories.IRepository;
 using NanyPet.Models.Dto.Herder;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using AuthenticationSchemes = Microsoft.AspNetCore.Server.HttpSys.AuthenticationSchemes;
 
 namespace NanyPet.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "admin", AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class HerderController : ControllerBase
@@ -84,7 +86,7 @@ namespace NanyPet.Controllers
             try
             {
                 _logger.LogInformation("Obteniendo lista de cuidadores"); // log -> show information on VS terminal
-                var herderList =  _herderRepository.GetAllPaginated(parameters);
+                var herderList = _herderRepository.GetAllPaginated(parameters);
                 _apiResponse.Result = _mapper.Map<IEnumerable<HerderDto>>(herderList);
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 _apiResponse.TotalPages = herderList.MetaData.TotalPages;
@@ -118,11 +120,11 @@ namespace NanyPet.Controllers
             Description = "Obtiene cuidador por Id",
             OperationId = "GetHerderById",
             Tags = new[] { "Cuidadores" })]
-        public async Task<ActionResult<APIResponse>> GetHerdersById(int id)
+        public async Task<ActionResult<APIResponse>> GetHerdersById(string id)
         {
             try
             {
-                if (id == 0)
+                if (id == "")
                 {
                     _logger.LogError("Error al buscar con Id " + id);
                     _apiResponse.IsSuccess = false;
@@ -313,11 +315,11 @@ namespace NanyPet.Controllers
             Description = "Elimina los datos de cuidador por su id",
             OperationId = "DeleteHerder",
             Tags = new[] { "Cuidadores" })]
-        public async Task<IActionResult> DeleteHerder(int id)
+        public async Task<IActionResult> DeleteHerder(string id)
         {
             try
             {
-                if (id == 0)
+                if (id == "")
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
