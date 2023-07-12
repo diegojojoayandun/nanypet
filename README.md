@@ -1,6 +1,6 @@
 # NanyPet RestAPI
 
-![alt text](https://photos.app.goo.gl/etGci39zFxfJqZdk9)
+![alt text](https://imgur.com/Gfhy9Yj)
 
 This project is meant for educational purposes only.
 
