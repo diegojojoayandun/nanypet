@@ -4,7 +4,7 @@
 
 This project is meant for educational purposes only.
 
-RestAPI which manage basic CRUD operations for nanypet App, Onion Arquitecture, caching, pagination, repository pattern
+RestAPI manage basic CRUD operations for nanypet App, using onion Arquitecture, caching, pagination, repository pattern
 
 There are many pet friendly places, however, some good places still do not allow pets. 
 NanyPet brings you the opportunity to contact pet lovers who will gladly take care of your pet, while you enjoy a good restaurant with your family. movies, shopping or any other activity. 
