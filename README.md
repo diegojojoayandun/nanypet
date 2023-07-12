@@ -1,6 +1,6 @@
 # NanyPet RestAPI
 
-![alt text](https://imgur.com/Gfhy9Yj)
+![alt text]([https://i.ibb.co/yST3rtq/nanypet-logo-removebg-preview.png)
 
 This project is meant for educational purposes only.
 
